@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Assistente Fiscal - TECNOGLOBO</title>
+<style>
+:root {
+  --primary:#E65100; --secondary:#5D4037; --accent:#FFB74D;
+  --text-light:#FFFFFF; --text-dark:#3E2723;
+  --bg-light:#F5F5F5; --bg-medium:#EFEBE9; --bg-alert:#FFF8E1;
+  --border:#D7CCC8; --success:#388E3C; --error:#D32F2F; --warning:#FFA000;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif}
+body{background:var(--bg-light);color:var(--text-dark);min-height:100vh;padding-bottom:50px}
+.header{background:var(--secondary);color:var(--text-light);padding:10px 20px;text-align:center}
+.header h1{font-size:14px;font-weight:bold;margin-bottom:2px}
+.header .info{font-size:9px;color:var(--accent);margin-bottom:3px}
+.header h2{font-size:11px;font-weight:bold;color:var(--bg-light)}
+.progress-wrap{background:var(--bg-medium);padding:8px 20px;border-bottom:1px solid var(--border)}
+.progress-label{font-size:9px;font-weight:bold;color:var(--secondary);margin-bottom:4px}
+.progress-bar{width:100%;height:10px;background:var(--border);border-radius:5px;overflow:hidden}
+.progress-fill{height:100%;background:var(--primary);border-radius:5px;transition:width .3s}
+.progress-text{font-size:8px;color:var(--text-dark);text-align:right;margin-top:2px}
+.main{max-width:900px;margin:0 auto;padding:20px}
+.step-title{background:var(--primary);color:var(--text-light);font-size:12px;font-weight:bold;padding:8px 14px;margin-bottom:16px;border-radius:4px}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:11px;font-weight:bold;color:var(--secondary);margin-bottom:4px}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:4px;font-size:11px;color:var(--text-dark);background:white;transition:border .2s}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{outline:none;border-color:var(--primary)}
+.form-group textarea{height:80px;resize:vertical}
+.form-group small{display:block;font-size:9px;color:var(--text-dark);margin-bottom:4px}
+.option-list{list-style:none;display:flex;flex-direction:column;gap:6px}
+.option-item{display:flex;align-items:center;padding:10px 14px;border:2px solid var(--border);border-radius:8px;cursor:pointer;transition:all .2s;background:white;user-select:none}
+.option-item:hover{border-color:var(--primary);background:var(--bg-alert)}
+.option-item.selected{border-color:var(--primary);background:#FFF3E0}
+.check-box{width:22px;height:22px;border:2px solid var(--border);border-radius:50%;margin-right:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:bold;transition:all .2s;color:transparent}
+.option-item.selected .check-box{background:var(--primary);border-color:var(--primary);color:white}
+.option-item.selected .opt-label{font-weight:bold;color:var(--primary)}
+.outros-field{display:none;margin-top:8px;padding:10px;background:var(--bg-alert);border-radius:4px;border:1px solid var(--warning)}
+.outros-field.visible{display:block}
+.products-table{width:100%;border-collapse:collapse;font-size:10px;margin-bottom:8px}
+.products-table th{background:var(--secondary);color:var(--text-light);padding:6px 4px;text-align:center;border:1px solid var(--accent)}
+.products-table td{padding:4px;border:1px solid var(--border);background:var(--bg-medium);vertical-align:middle}
+.products-table td input{width:100%;border:none;background:transparent;font-size:10px;padding:2px 4px;color:var(--text-dark)}
+.products-table td input:focus{outline:1px solid var(--primary);background:white;border-radius:2px}
+.products-table .tot-cell{text-align:center;font-weight:bold;color:var(--success);font-size:11px}
+.btn-add{background:var(--success);color:white;border:none;padding:7px 16px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:bold;margin-bottom:8px}
+.btn-remove{background:var(--error);color:white;border:none;padding:3px 7px;border-radius:3px;cursor:pointer;font-size:11px;font-weight:bold}
+.nav-buttons{display:flex;gap:10px;justify-content:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);flex-wrap:wrap}
+.btn-back{background:var(--text-dark);color:white;border:none;padding:10px 22px;border-radius:4px;font-size:12px;font-weight:bold;cursor:pointer}
+.btn-next{background:var(--primary);color:white;border:none;padding:10px 26px;border-radius:4px;font-size:12px;font-weight:bold;cursor:pointer}
+.btn-export{color:white;border:none;padding:10px 18px;border-radius:4px;font-size:11px;font-weight:bold;cursor:pointer;margin:4px}
+.alert{background:var(--bg-alert);border:2px solid var(--warning);color:var(--warning);padding:8px 12px;font-size:10px;font-weight:bold;border-radius:4px;margin-bottom:12px;text-align:center}
+.footer{background:var(--secondary);color:var(--accent);text-align:center;padding:8px;font-size:9px;font-style:italic;position:fixed;bottom:0;width:100%}
+.summary-section-title{background:var(--primary);color:white;font-weight:bold;padding:5px 8px;font-size:10px;margin-top:8px}
+.summary-row{display:flex;border:1px solid var(--border);font-size:10px}
+.summary-row:nth-child(even){background:var(--bg-medium)}
+.summary-row:nth-child(odd){background:var(--bg-light)}
+.summary-key{font-weight:bold;color:var(--secondary);padding:4px 8px;width:28%;border-right:1px solid var(--border);flex-shrink:0}
+.summary-val{padding:4px 8px;color:var(--text-dark)}
+.total-row{background:var(--success)!important;color:white;font-weight:bold;font-size:12px;padding:6px 10px;text-align:center}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>TECNOGLOBO EQUIPAMENTOS LTDA</h1>
+  <p class="info">Rua Joao David Perneta, 355 - Hugo Langue - Curitiba/PR - CEP 80040-330 | CNPJ: 07.700.041/0001-84 | IE: 9035777625</p>
+  <h2>ASSISTENTE FISCAL — NF-e / NFS-e</h2>
+</div>
+<div class="progress-wrap">
+  <div class="progress-label">Progresso:</div>
+  <div class="progress-bar"><div class="progress-fill" id="pgFill" style="width:0%"></div></div>
+  <div class="progress-text" id="pgText">Etapa 0 de 7</div>
+</div>
+<div class="main" id="app"></div>
+<div class="footer">Confirme NCM e CFOP com seu contador antes de emitir.</div>
+
+<script>
+// ── EMITENTE ────────────────────────────────────────────────────────────────
+const E = {
+  razao:"TECNOGLOBO EQUIPAMENTOS LTDA", fantasia:"TECNOGLOBO",
+  cnpj:"07.700.041/0001-84", ie:"9035777625",
+  end:"Rua Joao David Perneta, 355", bairro:"Hugo Langue",
+  cidade:"Curitiba", uf:"PR", cep:"80040-330",
+  regime:"Lucro Presumido", crt:"3"
+};
+
+const NCM_MAP = {
+  "84713019":["5.102 - Venda dentro do estado","6.102 - Venda para outro estado"],
+  "84433199":["5.102 - Venda dentro do estado","6.102 - Venda para outro estado"],
+  "85176299":["5.102 - Venda dentro do estado","6.102 - Venda para outro estado"],
+  "85287200":["5.102 - Venda dentro do estado","6.102 - Venda para outro estado"],
+  "84714900":["5.102 - Venda dentro do estado","6.102 - Venda para outro estado"],
+};
+const CFOP_DEFAULT = [
+  "5.102 - Venda dentro do estado","6.102 - Venda para outro estado",
+  "5.949 - Remessa demonstracao no estado","6.949 - Remessa demonstracao outro estado",
+  "5.411 - Devolucao no estado","6.411 - Devolucao para outro estado",
+  "5.202 - Devolucao de compra no estado","6.202 - Devolucao de compra outro estado"
+];
+
+// ── STATE ───────────────────────────────────────────────────────────────────
+let D = {
+  tipo_nota:"", tipo_outro:"",
+  razao:"", cpf_cnpj:"", insc_est:"", endereco:"", email:"",
+  produtos:[],
+  ncm:"", cfop:"", natureza:"",
+  pagamento:"", frete:"", transportadora:"",
+  observacoes:""
+};
+let step = 0;
+const STEPS = 7;
+
+// ── HELPERS ─────────────────────────────────────────────────────────────────
+const app = () => document.getElementById('app');
+
+function setProg(n) {
+  document.getElementById('pgFill').style.width = (n/STEPS*100)+'%';
+  document.getElementById('pgText').textContent =
+    `Etapa ${n} de ${STEPS}  |  ${'▓'.repeat(n)}${'░'.repeat(STEPS-n)}`;
+}
+
+function go(n) { step=n; setProg(n); RENDERS[n](); }
+
+function navBtns(backN, fwdFn, fwdLabel='▶ CONTINUAR') {
+  const bk = backN>=0 ? `<button class="btn-back" onclick="go(${backN})">◀ VOLTAR</button>` : '';
+  return `<div class="nav-buttons">${bk}<button class="btn-next" onclick="${fwdFn}">${fwdLabel}</button></div>`;
+}
+
+function selOpts(listId, opts, current, onClickFn) {
+  return opts.map(op => `
+    <li class="option-item ${current===op?'selected':''}" onclick="${onClickFn}('${escH(op)}',this)">
+      <div class="check-box">${current===op?'✓':''}</div>
+      <span class="opt-label">${op}</span>
+    </li>`).join('');
+}
+
+function selectItem(el, varName, value) {
+  const list = el.closest('.option-list');
+  list.querySelectorAll('.option-item').forEach(i=>{
+    i.classList.remove('selected');
+    i.querySelector('.check-box').textContent='';
+  });
+  el.classList.add('selected');
+  el.querySelector('.check-box').textContent='✓';
+  D[varName] = value;
+}
+
+function escH(s){ return (s||'').replace(/'/g,"\\'"); }
+function escX(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function fmtBRL(n){ return 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function parseBRL(s){ return parseFloat((s||'0').replace(/[R$\s]/g,'').replace(/\./g,'').replace(',','.'))||0; }
+
+// ── STEP 0: BEM-VINDO ────────────────────────────────────────────────────────
+function r0() {
+  app().innerHTML = `
+  <div style="text-align:center;padding:20px 10px">
+    <h2 style="color:var(--secondary);font-size:16px;margin-bottom:14px">Bem-vindo ao Assistente Fiscal!</h2>
+    <p style="font-size:12px;color:var(--text-dark);text-align:left;max-width:520px;margin:0 auto 16px;line-height:1.8">
+      Preencha os 7 blocos para gerar o rascunho da nota:<br>
+      &nbsp;&nbsp;<b>Bloco 1</b> — Tipo de Nota Fiscal<br>
+      &nbsp;&nbsp;<b>Bloco 2</b> — Dados do Destinatário<br>
+      &nbsp;&nbsp;<b>Bloco 3</b> — Produtos / Equipamentos (múltiplos itens)<br>
+      &nbsp;&nbsp;<b>Bloco 4</b> — Códigos Fiscais (NCM / CFOP)<br>
+      &nbsp;&nbsp;<b>Bloco 5</b> — Condições da Operação<br>
+      &nbsp;&nbsp;<b>Bloco 6</b> — Observações<br>
+      &nbsp;&nbsp;<b>Bloco 7</b> — Resumo + Exportar PDF / XML
+    </p>
+    <div class="alert">⚠ ATENÇÃO: Confirme NCM e CFOP com seu contador antes de emitir!</div>
+  </div>
+  ${navBtns(-1,'go(1)','▶ INICIAR PREENCHIMENTO')}`;
+}
+
+// ── STEP 1: TIPO DE NOTA ─────────────────────────────────────────────────────
+function r1() {
+  const opts = [
+    "NF-e - Venda de Equipamento / Produto",
+    "NFS-e - Prestacao de Servico",
+    "NF-e - Devolucao de Mercadoria",
+    "NF-e - Remessa / Demonstracao",
+    "NF-e - Transferencia entre Filiais",
+    "NF-e - Bonificacao / Brinde",
+    "Outros"
+  ];
+  const cur = D.tipo_nota || opts[0];
+  app().innerHTML = `
+  <div class="step-title">BLOCO 1 — TIPO DE NOTA FISCAL</div>
+  <p style="font-size:11px;margin-bottom:12px">Selecione o tipo de operação:</p>
+  <ul class="option-list">${selOpts('t1',opts,cur,'pickTipo')}</ul>
+  <div id="outroField" class="outros-field ${D.tipo_nota==='Outros'?'visible':''}">
+    <label style="font-size:11px;font-weight:bold;color:var(--secondary);display:block;margin-bottom:6px">Especifique o tipo de nota:</label>
+    <input type="text" id="tipoOutroTxt" placeholder="Descreva o tipo de nota fiscal..." value="${escH(D.tipo_outro)}" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:4px;font-size:11px">
+  </div>
+  ${navBtns(0,'saveT1()')}`;
+}
+function pickTipo(val,el){
+  selectItem(el,'tipo_nota',val);
+  const f=document.getElementById('outroField');
+  val==='Outros'?f.classList.add('visible'):f.classList.remove('visible');
+}
+function saveT1(){
+  if(!D.tipo_nota){alert('Selecione o tipo de nota.');return;}
+  if(D.tipo_nota==='Outros'){
+    const v=document.getElementById('tipoOutroTxt').value.trim();
+    if(!v){alert('Informe o tipo de nota.');return;}
+    D.tipo_outro=v;
+  }
+  go(2);
+}
+
+// ── STEP 2: DESTINATÁRIO ─────────────────────────────────────────────────────
+function r2(){
+  app().innerHTML=`
+  <div class="step-title">BLOCO 2 — DADOS DO DESTINATÁRIO</div>
+  <div class="form-group"><label>Razão Social / Nome *</label>
+    <input id="d_razao" type="text" placeholder="Ex: Empresa ABC Ltda" value="${escH(D.razao)}"></div>
+  <div class="form-group"><label>CPF / CNPJ *</label>
+    <input id="d_doc" type="text" placeholder="Ex: 00.000.000/0001-00" value="${escH(D.cpf_cnpj)}"></div>
+  <div class="form-group"><label>Inscrição Estadual</label>
+    <input id="d_ie" type="text" placeholder="ISENTO se aplicável" value="${escH(D.insc_est)}"></div>
+  <div class="form-group"><label>Endereço Completo *</label>
+    <input id="d_end" type="text" placeholder="Rua, número, bairro, cidade, UF, CEP" value="${escH(D.endereco)}"></div>
+  <div class="form-group"><label>E-mail *</label>
+    <input id="d_email" type="text" placeholder="financeiro@empresa.com.br" value="${escH(D.email)}"></div>
+  ${navBtns(1,'saveD2()')}`;
+}
+function saveD2(){
+  D.razao    = document.getElementById('d_razao').value.trim();
+  D.cpf_cnpj = document.getElementById('d_doc').value.trim();
+  D.insc_est = document.getElementById('d_ie').value.trim()||'ISENTO';
+  D.endereco = document.getElementById('d_end').value.trim();
+  D.email    = document.getElementById('d_email').value.trim();
+  const miss=[];
+  if(!D.razao)    miss.push('Razão Social');
+  if(!D.cpf_cnpj) miss.push('CPF/CNPJ');
+  if(!D.endereco) miss.push('Endereço');
+  if(!D.email)    miss.push('E-mail');
+  if(miss.length){alert('Preencha:\n'+miss.join('\n'));return;}
+  go(3);
+}
+
+// ── STEP 3: PRODUTOS ─────────────────────────────────────────────────────────
+function r3(){
+  if(!D.produtos.length)
+    D.produtos=[{desc:'',ncm:'',qtd:'1',vlrU:'',vlrT:'',serie:''}];
+  const rows=D.produtos.map((p,i)=>`
+    <tr>
+      <td style="text-align:center;font-weight:bold;width:4%">${String(i+1).padStart(3,'0')}</td>
+      <td style="width:28%"><input type="text" id="pd_${i}" placeholder="Descrição do produto..." value="${escH(p.desc)}" onchange="updP(${i},'desc',this.value)"></td>
+      <td style="width:10%"><input type="text" id="pn_${i}" placeholder="NCM" value="${escH(p.ncm)}" onchange="updP(${i},'ncm',this.value)" style="width:90px"></td>
+      <td style="width:7%"><input type="number" id="pq_${i}" value="${p.qtd||1}" min="0.001" step="0.001" onchange="calcT(${i})" style="width:55px"></td>
+      <td style="width:11%"><input type="text" id="pv_${i}" placeholder="0,00" value="${escH(p.vlrU)}" onchange="calcT(${i})" style="width:80px"></td>
+      <td class="tot-cell" id="pt_${i}" style="width:12%;min-width:80px">${p.vlrT||'—'}</td>
+      <td style="width:13%"><input type="text" id="ps_${i}" placeholder="S/N" value="${escH(p.serie)}" onchange="updP(${i},'serie',this.value)"></td>
+      <td style="width:5%;text-align:center">${D.produtos.length>1?`<button class="btn-remove" onclick="remP(${i})">✕</button>`:''}</td>
+    </tr>`).join('');
+  app().innerHTML=`
+  <div class="step-title">BLOCO 3 — PRODUTOS / EQUIPAMENTOS</div>
+  <div class="alert">Adicione todos os itens que farão parte desta nota fiscal.</div>
+  <button class="btn-add" onclick="addP()">+ Adicionar Item</button>
+  <div style="overflow-x:auto">
+    <table class="products-table">
+      <thead><tr>
+        <th>Item</th><th>Descrição *</th><th>NCM</th>
+        <th>Qtd *</th><th>Vlr Unit *</th><th>Vlr Total</th>
+        <th>N. Série</th><th></th>
+      </tr></thead>
+      <tbody id="ptBody">${rows}</tbody>
+    </table>
+  </div>
+  ${navBtns(2,'saveP3()')}`;
+}
+function updP(i,f,v){ D.produtos[i][f]=v; }
+function calcT(i){
+  const q=parseFloat(document.getElementById('pq_'+i).value)||0;
+  const v=parseBRL(document.getElementById('pv_'+i).value);
+  const t=q*v;
+  document.getElementById('pt_'+i).textContent=t>0?fmtBRL(t):'—';
+  D.produtos[i].qtd=document.getElementById('pq_'+i).value;
+  D.produtos[i].vlrU=document.getElementById('pv_'+i).value;
+  D.produtos[i].vlrT=t>0?fmtBRL(t):'';
+}
+function addP(){ D.produtos.push({desc:'',ncm:'',qtd:'1',vlrU:'',vlrT:'',serie:''}); r3(); }
+function remP(i){ D.produtos.splice(i,1); r3(); }
+function saveP3(){
+  D.produtos.forEach((p,i)=>{
+    p.desc  = (document.getElementById('pd_'+i)||{}).value||p.desc;
+    p.ncm   = (document.getElementById('pn_'+i)||{}).value||p.ncm;
+    p.qtd   = (document.getElementById('pq_'+i)||{}).value||p.qtd;
+    p.vlrU  = (document.getElementById('pv_'+i)||{}).value||p.vlrU;
+    p.serie = (document.getElementById('ps_'+i)||{}).value||p.serie;
+    const q=parseFloat((p.qtd||'1').replace(',','.'))||0;
+    const v=parseBRL(p.vlrU);
+    p.vlrT=q*v>0?fmtBRL(q*v):'';
+  });
+  const bad=D.produtos.filter(p=>!p.desc||!p.qtd||!p.vlrU);
+  if(bad.length){alert('Preencha Descrição, Quantidade e Valor Unitário em todos os itens.');return;}
+  go(4);
+}
+
+// ── STEP 4: CÓDIGOS FISCAIS ──────────────────────────────────────────────────
+function r4(){
+  const ncm=D.ncm||(D.produtos[0]?.ncm||'');
+  const cfopList=getCFOP(ncm.replace(/\./g,''));
+  const curCfop=D.cfop||'';
+  const isManual=curCfop&&!cfopList.includes(curCfop);
+  const opts=[...cfopList,'Outro (informar manualmente)'];
+  const curSel=isManual?'Outro (informar manualmente)':curCfop;
+  const nats=["VENDA DE EQUIPAMENTO","VENDA DE MERCADORIA","PRESTACAO DE SERVICO",
+    "REMESSA PARA DEMONSTRACAO","DEVOLUCAO DE VENDA","TRANSFERENCIA ENTRE FILIAIS","EXPORTACAO DE PRODUTO"];
+  app().innerHTML=`
+  <div class="step-title">BLOCO 4 — CÓDIGOS FISCAIS (NCM / CFOP)</div>
+  <div class="alert">⚠ Confirme NCM e CFOP com seu contador!</div>
+  <div class="form-group">
+    <label>Código NCM (8 dígitos) *</label>
+    <small>8471.30.19 Computadores | 8443.31.99 Impressoras | 8517.62.99 Roteadores | 8528.72.00 Monitores | 8471.49.00 Notebooks</small>
+    <input id="ncmF" type="text" placeholder="Ex: 84713019" value="${escH(ncm)}" oninput="updCFOP()" style="max-width:220px;margin-top:4px">
+  </div>
+  <div class="form-group">
+    <label>CFOP *</label>
+    <ul class="option-list" id="cfopList">${selOpts('c',opts,curSel,'pickCFOP')}</ul>
+    <div id="cfopManDiv" class="outros-field ${isManual||curSel==='Outro (informar manualmente)'?'visible':''}">
+      <label style="font-size:11px;font-weight:bold;color:var(--secondary);display:block;margin-bottom:6px">CFOP Manual:</label>
+      <input type="text" id="cfopManTxt" placeholder="Ex: 5.102" value="${isManual?escH(curCfop):''}" style="max-width:200px;padding:8px;border:1.5px solid var(--border);border-radius:4px;font-size:11px">
+    </div>
+  </div>
+  <div class="form-group">
+    <label>Natureza da Operação *</label>
+    <select id="natSel" style="max-width:420px">
+      ${nats.map(n=>`<option ${D.natureza===n?'selected':''}>${n}</option>`).join('')}
+    </select>
+  </div>
+  ${navBtns(3,'saveC4()')}`;
+}
+function getCFOP(ncm){ return NCM_MAP[ncm]||CFOP_DEFAULT; }
+function updCFOP(){
+  const ncm=document.getElementById('ncmF').value.trim().replace(/\./g,'');
+  const list=getCFOP(ncm);
+  const opts=[...list,'Outro (informar manualmente)'];
+  document.getElementById('cfopList').innerHTML=selOpts('c',opts,'','pickCFOP');
+  D.cfop='';
+}
+function pickCFOP(val,el){
+  selectItem(el,'cfop',val);
+  const md=document.getElementById('cfopManDiv');
+  val==='Outro (informar manualmente)'?md.classList.add('visible'):md.classList.remove('visible');
+}
+function saveC4(){
+  D.ncm=document.getElementById('ncmF').value.trim();
+  if(!D.ncm){alert('Informe o NCM.');return;}
+  if(D.cfop==='Outro (informar manualmente)'){
+    const m=document.getElementById('cfopManTxt').value.trim();
+    if(!m){alert('Informe o CFOP manualmente.');return;}
+    D.cfop=m;
+  } else if(!D.cfop){alert('Selecione o CFOP.');return;}
+  D.natureza=document.getElementById('natSel').value;
+  go(5);
+}
+
+// ── STEP 5: CONDIÇÕES ────────────────────────────────────────────────────────
+function r5(){
+  const pags=['A Vista','A Prazo','Boleto Bancario','Cartao de Credito','Cartao de Debito','Cheque','Outros'];
+  const fretes=['0 - Emitente','1 - Destinatario','2 - Terceiros','9 - Sem Frete'];
+  const transpOpts=['Correios','Jadlog','Loggi','Sequoia','Total Express','Outra'];
+  const curTransp=transpOpts.includes(D.transportadora)?D.transportadora:'Outra';
+  app().innerHTML=`
+  <div class="step-title">BLOCO 5 — CONDIÇÕES DA OPERAÇÃO</div>
+  <div class="form-group">
+    <label>Forma de Pagamento *</label>
+    <ul class="option-list">${selOpts('pg',pags,D.pagamento,'pickPag')}</ul>
+  </div>
+  <div class="form-group" style="margin-top:14px">
+    <label>Modalidade do Frete *</label>
+    <ul class="option-list">${selOpts('fr',fretes,D.frete,'pickFrete')}</ul>
+  </div>
+  <div class="form-group" style="margin-top:14px">
+    <label>Transportadora</label>
+    <ul class="option-list">${selOpts('tr',transpOpts,curTransp,'pickTransp')}</ul>
+    <div id="transpManDiv" class="outros-field ${curTransp==='Outra'?'visible':''}">
+      <label style="font-size:11px;font-weight:bold;color:var(--secondary);display:block;margin-bottom:6px">Nome da Transportadora:</label>
+      <input type="text" id="transpManTxt" placeholder="Nome da transportadora..."
+        value="${!transpOpts.slice(0,-1).includes(D.transportadora)&&D.transportadora?escH(D.transportadora):''}"
+        style="max-width:320px;padding:8px;border:1.5px solid var(--border);border-radius:4px;font-size:11px">
+    </div>
+  </div>
+  ${navBtns(4,'saveC5()')}`;
+}
+function pickPag(val,el){ selectItem(el,'pagamento',val); }
+function pickFrete(val,el){ selectItem(el,'frete',val); }
+function pickTransp(val,el){
+  selectItem(el,'transportadora',val);
+  const md=document.getElementById('transpManDiv');
+  val==='Outra'?md.classList.add('visible'):md.classList.remove('visible');
+}
+function saveC5(){
+  if(!D.pagamento){alert('Selecione a forma de pagamento.');return;}
+  if(!D.frete){alert('Selecione a modalidade de frete.');return;}
+  if(D.transportadora==='Outra'){
+    const m=document.getElementById('transpManTxt').value.trim();
+    D.transportadora=m||'Nao informado';
+  }
+  go(6);
+}
+
+// ── STEP 6: OBSERVAÇÕES ──────────────────────────────────────────────────────
+function r6(){
+  app().innerHTML=`
+  <div class="step-title">BLOCO 6 — OBSERVAÇÕES</div>
+  <div class="form-group">
+    <label>Observações Adicionais</label>
+    <textarea id="obsT" placeholder="Observações para a nota fiscal...">${D.observacoes&&D.observacoes!=='Sem observacoes'?D.observacoes:''}</textarea>
+  </div>
+  ${navBtns(5,'saveObs()')}`;
+}
+function saveObs(){
+  D.observacoes=document.getElementById('obsT').value.trim()||'Sem observacoes';
+  go(7);
+}
+
+// ── STEP 7: RESUMO FINAL ─────────────────────────────────────────────────────
+function r7(){
+  const total=D.produtos.reduce((a,p)=>a+parseBRL(p.vlrT),0);
+  const totalStr=fmtBRL(total);
+  const tipo=D.tipo_nota==='Outros'?(D.tipo_outro||D.tipo_nota):D.tipo_nota;
+  const prodRows=D.produtos.map((p,i)=>`
+    <tr>
+      <td style="text-align:center;padding:4px 3px;border:1px solid var(--border)">${String(i+1).padStart(3,'0')}</td>
+      <td style="padding:4px;border:1px solid var(--border)">${p.desc}</td>
+      <td style="text-align:center;padding:4px 3px;border:1px solid var(--border)">${p.ncm||'—'}</td>
+      <td style="text-align:center;padding:4px 3px;border:1px solid var(--border)">${p.qtd}</td>
+      <td style="text-align:center;padding:4px 3px;border:1px solid var(--border)">${p.vlrU}</td>
+      <td style="text-align:center;font-weight:bold;color:var(--success);padding:4px 3px;border:1px solid var(--border)">${p.vlrT||'—'}</td>
+      <td style="text-align:center;padding:4px 3px;border:1px solid var(--border)">${p.serie||'—'}</td>
+    </tr>`).join('');
+  app().innerHTML=`
+  <div class="step-title" style="background:var(--success)">BLOCO 7 — RESUMO FINAL</div>
+  <div class="alert" style="border-color:var(--error);color:var(--error)">⚠ DOCUMENTO SEM VALOR FISCAL — Rascunho para conferência interna</div>
+
+  <div class="summary-section-title">NATUREZA DA OPERAÇÃO</div>
+  <div class="summary-row"><span class="summary-key">Tipo de Nota</span><span class="summary-val">${tipo}</span></div>
+  <div class="summary-row"><span class="summary-key">Natureza</span><span class="summary-val">${D.natureza}</span></div>
+  <div class="summary-row"><span class="summary-key">CFOP</span><span class="summary-val">${D.cfop}</span></div>
+  <div class="summary-row"><span class="summary-key">NCM</span><span class="summary-val">${D.ncm}</span></div>
+
+  <div class="summary-section-title">DESTINATÁRIO</div>
+  <div class="summary-row"><span class="summary-key">Razão Social</span><span class="summary-val">${D.razao}</span></div>
+  <div class="summary-row"><span class="summary-key">CPF/CNPJ</span><span class="summary-val">${D.cpf_cnpj}</span></div>
+  <div class="summary-row"><span class="summary-key">Insc. Estadual</span><span class="summary-val">${D.insc_est}</span></div>
+  <div class="summary-row"><span class="summary-key">Endereço</span><span class="summary-val">${D.endereco}</span></div>
+  <div class="summary-row"><span class="summary-key">E-mail</span><span class="summary-val">${D.email}</span></div>
+
+  <div class="summary-section-title">PRODUTOS / EQUIPAMENTOS</div>
+  <div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse;font-size:10px">
+      <thead><tr style="background:var(--secondary)">
+        <th style="color:white;padding:4px;border:1px solid var(--accent);width:5%">Item</th>
+        <th style="color:white;padding:4px;border:1px solid var(--accent);width:30%">Descrição</th>
+        <th style="color:white;padding:4px;border:1px solid var(--accent);width:10%">NCM</th>
+        <th style="color:white;padding:4px;border:1px solid var(--accent);width:7%">Qtd</th>
+        <th style="color:white;padding:4px;border:1px solid var(--accent);width:12%">Vlr Unit</th>
+        <th style="color:white;padding:4px;border:1px solid var(--accent);width:13%">Vlr Total</th>
+        <th style="color:white;padding:4px;border:1px solid var(--accent);width:13%">N. Série</th>
+      </tr></thead>
+      <tbody>${prodRows}</tbody>
+      <tfoot><tr style="background:var(--success)">
+        <td colspan="5" style="color:white;font-weight:bold;padding:5px 8px;text-align:right;border:1px solid var(--border)">VALOR TOTAL NF:</td>
+        <td colspan="2" style="color:white;font-weight:bold;padding:5px 8px;font-size:12px;border:1px solid var(--border)">${totalStr}</td>
+      </tr></tfoot>
+    </table>
+  </div>
+
+  <div class="summary-section-title">TRANSPORTE &amp; PAGAMENTO</div>
+  <div class="summary-row"><span class="summary-key">Frete</span><span class="summary-val">${D.frete}</span></div>
+  <div class="summary-row"><span class="summary-key">Transportadora</span><span class="summary-val">${D.transportadora}</span></div>
+  <div class="summary-row"><span class="summary-key">Pagamento</span><span class="summary-val">${D.pagamento}</span></div>
+  <div class="summary-row"><span class="summary-key">Observações</span><span class="summary-val">${D.observacoes}</span></div>
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:20px 0">
+    <button class="btn-export" style="background:#C62828" onclick="expPDF()">🖨 SALVAR PDF (DANFE)</button>
+    <button class="btn-export" style="background:#1565C0" onclick="expXML()">📄 EXPORTAR XML (NF-e)</button>
+    <button class="btn-export" style="background:#2E7D32" onclick="expHTML()">🌐 EXPORTAR HTML</button>
+  </div>
+  ${navBtns(6,'novaNota()','🔄 NOVA NOTA')}`;
+}
+
+// ── EXPORTS ──────────────────────────────────────────────────────────────────
+function danfeBody(forPrint){
+  const total=D.produtos.reduce((a,p)=>a+parseBRL(p.vlrT),0);
+  const totalStr=fmtBRL(total);
+  const dh=new Date().toLocaleString('pt-BR');
+  const tipo=D.tipo_nota==='Outros'?(D.tipo_outro||D.tipo_nota):D.tipo_nota;
+  const prodRows=D.produtos.map((p,i)=>`
+    <tr>
+      <td style="text-align:center;padding:3px;border:1px solid #D7CCC8">${String(i+1).padStart(3,'0')}</td>
+      <td style="padding:3px;border:1px solid #D7CCC8">${p.desc}</td>
+      <td style="text-align:center;padding:3px;border:1px solid #D7CCC8">${p.ncm||'—'}</td>
+      <td style="text-align:center;padding:3px;border:1px solid #D7CCC8">${p.qtd}</td>
+      <td style="text-align:center;padding:3px;border:1px solid #D7CCC8">${p.vlrU}</td>
+      <td style="text-align:center;font-weight:bold;color:#388E3C;padding:3px;border:1px solid #D7CCC8">${p.vlrT||'—'}</td>
+      <td style="text-align:center;padding:3px;border:1px solid #D7CCC8">${p.serie||'—'}</td>
+    </tr>`).join('');
+  const noprint=forPrint?'':`<div style="background:#FFF3E0;border:2px solid #E65100;padding:8px;text-align:center;margin-bottom:10px;font-weight:bold;font-size:11px">
+    Use Ctrl+P para imprimir / salvar como PDF &nbsp;|&nbsp; <a href="javascript:window.print()">Imprimir agora</a></div>`;
+  return `${noprint}
+  <div style="display:flex;border:2px solid #5D4037;margin-bottom:3px">
+    <div style="background:#5D4037;color:white;padding:6px 8px;flex:0 0 52%">
+      <div style="font-size:12px;font-weight:bold">${E.razao}</div>
+      <div style="font-size:7px;color:#FFB74D;margin-top:2px">${E.end} - ${E.bairro} - ${E.cidade}/${E.uf} - CEP ${E.cep}<br>CNPJ: ${E.cnpj} | IE: ${E.ie} | Regime: ${E.regime}</div>
+    </div>
+    <div style="background:#5D4037;color:white;flex:0 0 24%;text-align:center;padding:4px;border-left:1px solid #FFB74D;border-right:1px solid #FFB74D">
+      <div style="font-size:13px;font-weight:bold">DANFE</div>
+      <div style="font-size:7px;color:#FFB74D;margin-top:2px">Documento Auxiliar da<br>Nota Fiscal Eletrônica</div>
+      <div style="font-size:8px;font-weight:bold;margin-top:4px">ENTRADA 1 / SAÍDA 2</div>
+    </div>
+    <div style="background:#EFEBE9;flex:0 0 24%;padding:4px 6px;font-size:7px">
+      <table style="width:100%;border-collapse:collapse">
+        <tr><td style="font-weight:bold;color:#5D4037;padding:2px">No. NF:</td><td style="color:#D32F2F;font-weight:bold;font-size:9px">000.000.000</td></tr>
+        <tr><td style="font-weight:bold;color:#5D4037;padding:2px">Serie:</td><td>001</td></tr>
+        <tr><td style="font-weight:bold;color:#5D4037;padding:2px">Emissão:</td><td>${dh}</td></tr>
+        <tr><td style="font-weight:bold;color:#5D4037;padding:2px">CRT:</td><td>${E.crt}</td></tr>
+      </table>
+    </div>
+  </div>
+  <div style="background:#EFEBE9;border:1.5px solid #5D4037;padding:4px 8px;font-size:8px;color:#5D4037;font-family:Courier,monospace;text-align:center;margin-bottom:3px">
+    <strong>CHAVE DE ACESSO:</strong> 0000 0000 0000 0000 &nbsp; 0000 0000 0000 0000 &nbsp; 0000 0000 0000
+  </div>
+  <div style="background:#FFF8E1;border:2px solid #FFA000;padding:5px;font-size:8px;font-weight:bold;color:#FFA000;text-align:center;margin-bottom:5px">
+    ⚠ DOCUMENTO SEM VALOR FISCAL ⚠<br>
+    Este espelho é apenas um RASCUNHO para conferência interna. Não substitui a NF-e oficial transmitida e autorizada pela SEFAZ.
+  </div>
+  <div style="background:#E65100;color:white;font-weight:bold;font-size:9px;padding:4px 8px">NATUREZA DA OPERAÇÃO</div>
+  <table style="width:100%;border-collapse:collapse;font-size:8px;margin-bottom:4px">
+    <tr style="background:#EFEBE9"><td style="font-weight:bold;color:#5D4037;width:20%;padding:3px 6px;border:1px solid #D7CCC8">Tipo de Nota</td><td style="padding:3px 6px;border:1px solid #D7CCC8">${tipo}</td><td style="font-weight:bold;color:#5D4037;width:15%;padding:3px 6px;border:1px solid #D7CCC8">CFOP</td><td style="padding:3px 6px;border:1px solid #D7CCC8">${D.cfop}</td></tr>
+    <tr><td style="font-weight:bold;color:#5D4037;padding:3px 6px;border:1px solid #D7CCC8">Natureza</td><td style="padding:3px 6px;border:1px solid #D7CCC8">${D.natureza}</td><td style="font-weight:bold;color:#5D4037;padding:3px 6px;border:1px solid #D7CCC8">NCM</td><td style="padding:3px 6px;border:1px solid #D7CCC8">${D.ncm}</td></tr>
+  </table>
+  <div style="background:#E65100;color:white;font-weight:bold;font-size:9px;padding:4px 8px">DESTINATÁRIO</div>
+  <table style="width:100%;border-collapse:collapse;font-size:8px;margin-bottom:4px">
+    <tr style="background:#EFEBE9"><td style="font-weight:bold;color:#5D4037;width:20%;padding:3px 6px;border:1px solid #D7CCC8">Razão Social</td><td style="padding:3px 6px;border:1px solid #D7CCC8">${D.razao}</td><td style="font-weight:bold;color:#5D4037;width:15%;padding:3px 6px;border:1px solid #D7CCC8">CPF/CNPJ</td><td style="padding:3px 6px;border:1px solid #D7CCC8">${D.cpf_cnpj}</td></tr>
+    <tr><td style="font-weight:bold;color:#5D4037;padding:3px 6px;border:1px solid #D7CCC8">Insc. Estadual</td><td style="padding:3px 6px;border:1px solid #D7CCC8">${D.insc_est}</td><td style="font-weight:bold;color:#5D4037;padding:3px 6px;border:1px solid #D7CCC8">Endereço</td><td style="padding:3px 6px;border:1px solid #D7CCC8">${D.endereco}</td></tr>
+    <tr style="background:#EFEBE9"><td style="font-weight:bold;color:#5D4037;padding:3px 6px;border:1px solid #D7CCC8">E-mail</td><td colspan="3" style="padding:3px 6px;border:1px solid #D7CCC8">${D.email}</td></tr>
+  </table>
+  <div style="background:#E65100;color:white;font-weight:bold;font-size:9px;padding:4px 8px">PRODUTOS / EQUIPAMENTOS</div>
+  <table style="width:100%;border-collapse:collapse;font-size:8px;margin-bottom:4px">
+    <thead><tr style="background:#5D4037">
+      <th style="color:white;padding:3px 4px;border:1px solid #FFB74D;width:5%">Item</th>
+      <th style="color:white;padding:3px 4px;border:1px solid #FFB74D;width:30%">Descrição</th>
+      <th style="color:white;padding:3px 4px;border:1px solid #FFB74D;width:10%">NCM</th>
+      <th style="color:white;padding:3px 4px;border:1px solid #FFB74D;width:7%">Qtd</th>
+      <th style="color:white;padding:3px 4px;border:1px solid #FFB74D;width:12%">Vlr Unit</th>
+      <th style="color:white;padding:3px 4px;border:1px solid #FFB74D;width:13%">Vlr Total</th>
+      <th style="color:white;padding:3px 4px;border:1px solid #FFB74D;width:13%">N. Série</th>
+    </tr></thead>
+    <tbody>${prodRows}</tbody>
+    <tfoot><tr style="background:#388E3C">
+      <td colspan="5" style="color:white;font-weight:bold;padding:4px 8px;text-align:right;border:1px solid #D7CCC8">VALOR TOTAL NF:</td>
+      <td colspan="2" style="color:white;font-weight:bold;padding:4px 8px;font-size:11px;border:1px solid #D7CCC8">${totalStr}</td>
+    </tr></tfoot>
+  </table>
+  <div style="background:#E65100;color:white;font-weight:bold;font-size:9px;padding:4px 8px">CÁLCULO DO IMPOSTO E TOTAIS</div>
+  <table style="width:100%;border-collapse:collapse;font-size:8px;margin-bottom:4px">
+    <tr style="background:#EFEBE9"><td style="font-weight:bold;color:#5D4037;width:25%;padding:3px 6px;border:1px solid #D7CCC8">BC ICMS</td><td style="padding:3px 6px;border:1px solid #D7CCC8">A calcular no sistema</td><td style="font-weight:bold;color:#5D4037;width:25%;padding:3px 6px;border:1px solid #D7CCC8">Valor ICMS</td><td style="padding:3px 6px;border:1px solid #D7CCC8">A calcular no sistema</td></tr>
+    <tr><td style="font-weight:bold;color:#5D4037;padding:3px 6px;border:1px solid #D7CCC8">Valor Produtos</td><td style="padding:3px 6px;border:1px solid #D7CCC8">${totalStr}</td><td style="font-weight:bold;color:#5D4037;padding:3px 6px;border:1px solid #D7CCC8">Valor Frete</td><td style="padding:3px 6px;border:1px solid #D7CCC8">Verificar</td></tr>
+    <tr style="background:#EFEBE9"><td style="font-weight:bold;color:#5D4037;padding:3px 6px;border:1px solid #D7CCC8">Valor PIS</td><td style="padding:3px 6px;border:1px solid #D7CCC8">A calcular no sistema</td><td style="font-weight:bold;color:#5D4037;padding:3px 6px;border:1px solid #D7CCC8">Valor COFINS</td><td style="padding:3px 6px;border:1px solid #D7CCC8">A calcular no sistema</td></tr>
+    <tr style="background:#388E3C"><td style="color:white;font-weight:bold;padding:4px 6px;border:1px solid #D7CCC8">VALOR TOTAL NF</td><td style="color:white;font-weight:bold;font-size:11px;padding:4px 6px;border:1px solid #D7CCC8">${totalStr}</td><td style="color:white;font-weight:bold;padding:4px 6px;border:1px solid #D7CCC8">Forma Pgto</td><td style="color:white;font-weight:bold;padding:4px 6px;border:1px solid #D7CCC8">${D.pagamento}</td></tr>
+  </table>
+  <div style="background:#E65100;color:white;font-weight:bold;font-size:9px;padding:4px 8px">TRANSPORTE</div>
+  <table style="width:100%;border-collapse:collapse;font-size:8px;margin-bottom:4px">
+    <tr style="background:#EFEBE9"><td style="font-weight:bold;color:#5D4037;width:25%;padding:3px 6px;border:1px solid #D7CCC8">Modalidade do Frete</td><td style="padding:3px 6px;border:1px solid #D7CCC8">${D.frete}</td><td style="font-weight:bold;color:#5D4037;width:25%;padding:3px 6px;border:1px solid #D7CCC8">Transportadora</td><td style="padding:3px 6px;border:1px solid #D7CCC8">${D.transportadora}</td></tr>
+  </table>
+  <div style="background:#E65100;color:white;font-weight:bold;font-size:9px;padding:4px 8px">OBSERVAÇÕES</div>
+  <table style="width:100%;border-collapse:collapse;font-size:8px;margin-bottom:4px">
+    <tr><td style="font-weight:bold;color:#5D4037;width:20%;padding:3px 6px;border:1px solid #D7CCC8">Observações</td><td style="padding:3px 6px;border:1px solid #D7CCC8">${D.observacoes}</td></tr>
+  </table>
+  <div style="background:#388E3C;color:white;font-weight:bold;font-size:9px;padding:4px 8px">PRÓXIMOS PASSOS</div>
+  <table style="width:100%;border-collapse:collapse;font-size:8px;margin-bottom:6px">
+    <tr style="background:#EFEBE9"><td style="color:#5D4037;padding:4px 10px;border:1px solid #D7CCC8">1. Confirme o NCM e o CFOP com seu contador.</td></tr>
+    <tr><td style="color:#5D4037;padding:4px 10px;border:1px solid #D7CCC8">2. Acesse seu sistema de emissão (ERP / emissor SEFAZ).</td></tr>
+    <tr style="background:#EFEBE9"><td style="color:#5D4037;padding:4px 10px;border:1px solid #D7CCC8">3. Calcule os impostos (ICMS, PIS, COFINS, IPI) no sistema.</td></tr>
+    <tr><td style="color:#5D4037;padding:4px 10px;border:1px solid #D7CCC8">4. Transmita a nota para a SEFAZ e aguarde a autorização.</td></tr>
+  </table>
+  <div style="background:#EFEBE9;border:1px solid #D7CCC8;padding:4px 8px;font-size:7px;color:#3E2723;text-align:center">
+    Gerado em ${dh} | ${E.razao} | CNPJ: ${E.cnpj} | DOCUMENTO SEM VALOR FISCAL
+  </div>`;
+}
+
+function expPDF(){
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+    <title>DANFE - ${E.razao}</title>
+    <style>
+      @page{size:A4;margin:14mm}
+      *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
+      body{font-size:9px;color:#3E2723}
+      body::before{content:"SEM VALOR FISCAL";position:fixed;top:38%;left:5%;font-size:58px;font-weight:bold;color:rgba(180,180,180,0.15);transform:rotate(45deg);white-space:nowrap;pointer-events:none}
+      table{border-collapse:collapse}
+      .no-print{display:none}
+    </style>
+    </head><body>${danfeBody(true)}</body></html>`);
+  w.document.close();
+  w.focus();
+  setTimeout(()=>w.print(),600);
+}
+
+function expHTML(){
+  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+<title>DANFE - ${E.razao}</title>
+<style>
+  @page{size:A4;margin:14mm}
+  *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
+  body{font-size:9px;color:#3E2723;padding:10px}
+  body::before{content:"SEM VALOR FISCAL";position:fixed;top:38%;left:5%;font-size:58px;font-weight:bold;color:rgba(180,180,180,0.15);transform:rotate(45deg);white-space:nowrap;pointer-events:none}
+  table{border-collapse:collapse}
+  @media print{.no-print{display:none}}
+</style></head><body>${danfeBody(false)}</body></html>`;
+  dlBlob(html,'text/html','DANFE_'+safeName()+'.html');
+}
+
+function expXML(){
+  const now=new Date();
+  const dhISO=now.toISOString().replace(/\.\d+Z$/,'')+'-03:00';
+  const total=D.produtos.reduce((a,p)=>a+parseBRL(p.vlrT),0);
+  const cnpjE=E.cnpj.replace(/[^\d]/g,'');
+  const docD=D.cpf_cnpj.replace(/[^\d]/g,'');
+  const tagDest=docD.length===14?`<CNPJ>${docD}</CNPJ>`:`<CPF>${docD.padStart(11,'0')}</CPF>`;
+  const modFrete=D.frete.charAt(0)||'9';
+  const tPag=D.pagamento==='A Vista'?'01':D.pagamento==='Boleto Bancario'?'15':D.pagamento==='Cartao de Credito'?'03':D.pagamento==='Cartao de Debito'?'04':'99';
+  const tipo=D.tipo_nota==='Outros'?(D.tipo_outro||D.tipo_nota):D.tipo_nota;
+
+  let dets='';
+  D.produtos.forEach((p,i)=>{
+    const q=parseFloat((p.qtd||'1').replace(',','.'))||1;
+    const v=parseBRL(p.vlrU);
+    const t=parseBRL(p.vlrT)||q*v;
+    const ncmItem=(p.ncm||D.ncm||'00000000').replace(/\./g,'');
+    dets+=`
+  <det nItem="${i+1}">
+    <prod>
+      <cProd>${String(i+1).padStart(6,'0')}</cProd>
+      <cEAN>SEM GTIN</cEAN>
+      <xProd>${escX(p.desc)}</xProd>
+      <NCM>${ncmItem}</NCM>
+      <CFOP>${D.cfop.split(' - ')[0].replace(/\./g,'')}</CFOP>
+      <uCom>UN</uCom>
+      <qCom>${q.toFixed(4)}</qCom>
+      <vUnCom>${v.toFixed(10)}</vUnCom>
+      <vProd>${t.toFixed(2)}</vProd>
+      <cEANTrib>SEM GTIN</cEANTrib>
+      <uTrib>UN</uTrib>
+      <qTrib>${q.toFixed(4)}</qTrib>
+      <vUnTrib>${v.toFixed(10)}</vUnTrib>
+      <indTot>1</indTot>${p.serie?`\n      <nSerie>${escX(p.serie)}</nSerie>`:''}
+    </prod>
+    <imposto>
+      <ICMS><ICMS00><orig>0</orig><CST>00</CST><modBC>3</modBC><vBC>0.00</vBC><pICMS>0.00</pICMS><vICMS>0.00</vICMS></ICMS00></ICMS>
+      <PIS><PISAliq><CST>01</CST><vBC>0.00</vBC><pPIS>0.00</pPIS><vPIS>0.00</vPIS></PISAliq></PIS>
+      <COFINS><COFINSAliq><CST>01</CST><vBC>0.00</vBC><pCOFINS>0.00</pCOFINS><vCOFINS>0.00</vCOFINS></COFINSAliq></COFINS>
+    </imposto>
+  </det>`;
+  });
+
+  const xml=`<?xml version="1.0" encoding="UTF-8"?>
+<!-- RASCUNHO PARA CONFERENCIA INTERNA — SEM VALOR FISCAL -->
+<!-- Gerado em: ${now.toLocaleString('pt-BR')} -->
+<!-- Padrao NF-e v4.00 — ABNT NBR / SEFAZ -->
+<nfeProc versao="4.00" xmlns="http://www.portalfiscal.inf.br/nfe">
+  <NFe xmlns="http://www.portalfiscal.inf.br/nfe">
+    <infNFe versao="4.00" Id="NFe41${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}${cnpjE}5500100000000${String(Math.floor(Math.random()*99999999)).padStart(8,'0')}1">
+      <ide>
+        <cUF>41</cUF>
+        <cNF>${String(Math.floor(Math.random()*99999999)).padStart(8,'0')}</cNF>
+        <natOp>${escX(D.natureza)}</natOp>
+        <mod>55</mod>
+        <serie>1</serie>
+        <nNF>0</nNF>
+        <dhEmi>${dhISO}</dhEmi>
+        <tpNF>1</tpNF>
+        <idDest>1</idDest>
+        <cMunFG>4106902</cMunFG>
+        <tpImp>1</tpImp>
+        <tpEmis>1</tpEmis>
+        <cDV>0</cDV>
+        <tpAmb>2</tpAmb>
+        <finNFe>1</finNFe>
+        <indFinal>1</indFinal>
+        <indPres>1</indPres>
+        <procEmi>0</procEmi>
+        <verProc>ASSISTENTE-FISCAL-HTML-1.0</verProc>
+      </ide>
+      <emit>
+        <CNPJ>${cnpjE}</CNPJ>
+        <xNome>${escX(E.razao)}</xNome>
+        <xFant>${escX(E.fantasia)}</xFant>
+        <enderEmit>
+          <xLgr>${escX(E.end.split(',')[0]||E.end)}</xLgr>
+          <nro>${escX(E.end.split(',')[1]?.trim()||'S/N')}</nro>
+          <xBairro>${escX(E.bairro)}</xBairro>
+          <cMun>4106902</cMun>
+          <xMun>${escX(E.cidade)}</xMun>
+          <UF>${E.uf}</UF>
+          <CEP>${E.cep.replace(/[^\d]/g,'')}</CEP>
+          <cPais>1058</cPais>
+          <xPais>Brasil</xPais>
+        </enderEmit>
+        <IE>${E.ie}</IE>
+        <CRT>${E.crt}</CRT>
+      </emit>
+      <dest>
+        ${tagDest}
+        <xNome>${escX(D.razao)}</xNome>
+        <enderDest>
+          <xLgr>${escX(D.endereco)}</xLgr>
+          <nro>S/N</nro>
+          <xBairro>-</xBairro>
+          <cMun>0000000</cMun>
+          <xMun>-</xMun>
+          <UF>PR</UF>
+          <CEP>00000000</CEP>
+          <cPais>1058</cPais>
+          <xPais>Brasil</xPais>
+        </enderDest>
+        <indIEDest>9</indIEDest>
+        <email>${escX(D.email)}</email>
+      </dest>
+${dets}
+      <total>
+        <ICMSTot>
+          <vBC>0.00</vBC><vICMS>0.00</vICMS><vICMSDeson>0.00</vICMSDeson>
+          <vFCPUFDest>0.00</vFCPUFDest><vICMSUFDest>0.00</vICMSUFDest><vICMSUFRemet>0.00</vICMSUFRemet>
+          <vFCP>0.00</vFCP><vBCST>0.00</vBCST><vST>0.00</vST>
+          <vFCPST>0.00</vFCPST><vFCPSTRet>0.00</vFCPSTRet>
+          <vProd>${total.toFixed(2)}</vProd>
+          <vFrete>0.00</vFrete><vSeg>0.00</vSeg><vDesc>0.00</vDesc>
+          <vII>0.00</vII><vIPI>0.00</vIPI><vIPIDevol>0.00</vIPIDevol>
+          <vPIS>0.00</vPIS><vCOFINS>0.00</vCOFINS><vOutro>0.00</vOutro>
+          <vNF>${total.toFixed(2)}</vNF>
+        </ICMSTot>
+      </total>
+      <transp>
+        <modFrete>${modFrete}</modFrete>${D.transportadora&&D.transportadora!=='Nao informado'?`
+        <transporta><xNome>${escX(D.transportadora)}</xNome></transporta>`:''}
+      </transp>
+      <pag>
+        <detPag>
+          <tPag>${tPag}</tPag>
+          <vPag>${total.toFixed(2)}</vPag>
+        </detPag>
+      </pag>
+      <infAdic>
+        <infCpl>${escX(D.observacoes)} | Tipo: ${escX(tipo)} | Rascunho gerado em ${now.toLocaleString('pt-BR')}</infCpl>
+      </infAdic>
+    </infNFe>
+  </NFe>
+</nfeProc>`;
+  dlBlob(xml,'application/xml','NF_'+safeName()+'.xml');
+}
+
+function dlBlob(content,mime,filename){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([content],{type:mime+';charset=utf-8'}));
+  a.download=filename;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+}
+function safeName(){ return (D.razao.substring(0,12).replace(/\s/g,'_').replace(/[^a-zA-Z0-9_]/g,'')||'NF')+'_'+new Date().toISOString().slice(0,10).replace(/-/g,''); }
+
+function novaNota(){
+  if(!confirm('Iniciar nova nota? Os dados atuais serão apagados.'))return;
+  D={tipo_nota:'',tipo_outro:'',razao:'',cpf_cnpj:'',insc_est:'',endereco:'',email:'',
+     produtos:[],ncm:'',cfop:'',natureza:'',pagamento:'',frete:'',transportadora:'',observacoes:''};
+  go(0);
+}
+
+const RENDERS=[r0,r1,r2,r3,r4,r5,r6,r7];
+go(0);
+</script>
+</body>
+</html>
