@@ -3,6 +3,7 @@
 *.env
 .env.*
 config_local.py
+credentials.json
 
 # Python
 __pycache__/
